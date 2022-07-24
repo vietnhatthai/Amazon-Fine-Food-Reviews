@@ -1,6 +1,5 @@
 import json
 import os
-from regex import D
 import torch
 import torch.nn as nn
 from transformers import AutoModel, AutoConfig
