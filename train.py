@@ -113,5 +113,3 @@ for epoch in range(EPOCHS):
     print('-' * 10)
 
     model.save_pretrained(os.path.join(SAVE_PATH, MODELNAME))
-
-    torch.cuda.empty_cache()
