@@ -28,7 +28,7 @@ class ReviewsModel(nn.Module):
         x = x[0]
         x = x[:, 0, :]
         x = self.fc(x)
-        x = self.sigmoid(x)
+        # x = self.sigmoid(x)
         return x
 
     def save_pretrained(self, path):

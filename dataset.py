@@ -20,8 +20,8 @@ class ReviewDataset(Dataset):
         rating = self.data.iloc[idx]['Rating']
 
         token = self._get_token(text)
-        score = torch.tensor(score, dtype=torch.float)
-        rating = torch.tensor(rating, dtype=torch.float)
+        score = torch.FloatTensor([score])
+        rating = torch.FloatTensor([rating])
 
         return token['input_ids'][0], token['attention_mask'][0], score, rating
 

@@ -2,3 +2,9 @@
 test
 test*
 test/*
+
+
+# cache files
+.DS_Store
+__pycache__
+*.pyc
