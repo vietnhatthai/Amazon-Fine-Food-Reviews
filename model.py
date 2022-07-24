@@ -28,7 +28,7 @@ class ReviewsModel(nn.Module):
         x = x[0]
         x = x[:, 0, :]
         x = self.fc(x)
-        # x = self.sigmoid(x)
+        x = self.sigmoid(x)
         return x
 
     def save_pretrained(self, path):
@@ -42,10 +42,12 @@ class ReviewsModel(nn.Module):
     
     def from_pretrained(self, path):
         model_path = os.path.join(path, 'pytorch_model.dat')
+        device = self.base_model.device if self.base_model is not None else 'cpu'
         self.base_model = AutoModel.from_config(AutoConfig.from_pretrained(path))
         self._get_model()
 
         self.load_state_dict(torch.load(model_path))
+        self.to(device)
         self.eval()
 
 
