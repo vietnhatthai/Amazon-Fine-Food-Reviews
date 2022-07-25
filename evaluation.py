@@ -11,8 +11,8 @@ MAX_LENGTH = 128
 
 DATA_PATH = 'data'
 SAVE_PATH = 'weights'
-MODELNAME = 'bert-reviews'
-MODELNAME_OR_PATH = 'distilbert-base-uncased-finetuned-sst-2-english'
+MODELNAME = 'bert-reviews-kaggle'
+MODELNAME_OR_PATH = 'bert-base-uncased'
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print('device:', device)

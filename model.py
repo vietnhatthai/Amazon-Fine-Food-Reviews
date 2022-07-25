@@ -11,7 +11,7 @@ class ReviewsModel(nn.Module):
         self.num_classes = num_classes
 
         self.h_RNN_layers = 3       # RNN hidden layers
-        self.h_RNN = 256            # RNN hidden nodes
+        self.h_RNN = 512            # RNN hidden nodes
 
         if base_model is not None:
             self._get_model()
@@ -19,13 +19,14 @@ class ReviewsModel(nn.Module):
     def _get_model(self):
         self.last_hidden_layer_size = self.base_model.config.hidden_size
         self.lstm = nn.LSTM(
-                            input_size=self.last_hidden_layer_size,
-                            hidden_size=self.h_RNN,        
-                            num_layers=self.h_RNN_layers,       
-                            batch_first=True,           # input & output will has batch size as 1s dimension. e.g. (batch, time_step, input_size)
-                            )
+                        input_size=self.last_hidden_layer_size,
+                        hidden_size=self.h_RNN,        
+                        num_layers=self.h_RNN_layers,       
+                        batch_first=True,           # input & output will has batch size as 1s dimension. e.g. (batch, time_step, input_size)
+                        )
 
         self.fc = nn.Linear(self.h_RNN, self.num_classes)
+        self.gelu = nn.GELU()
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, input_ids, attention_mask):
@@ -38,10 +39,10 @@ class ReviewsModel(nn.Module):
         x = self.base_model(input_ids=input_ids, 
                             attention_mask=attention_mask,
                             return_dict=True)
-        
-        RNN_out, (h_n, h_c) = self.lstm(x.last_hidden_state, None)  
-        
-        x = self.fc(RNN_out[:, -1, :])   # choose RNN_out at the last time step
+        x = self.gelu(x.last_hidden_state)
+        RNN_out, Hs = self.lstm(x, None)  
+        x = self.gelu(RNN_out[:, -1, :])  # choose RNN_out at the last time step
+        x = self.fc(x)   
         x = self.softmax(x)
         return x
 
@@ -60,7 +61,9 @@ class ReviewsModel(nn.Module):
         self.base_model = AutoModel.from_config(AutoConfig.from_pretrained(path))
         self._get_model()
 
-        self.load_state_dict(torch.load(model_path))
+        missing_keys = self.load_state_dict(torch.load(model_path), strict=False)
+        if len(missing_keys) > 0:
+            print(Warning('Some keys are missing in the pretrained model: {}'.format(missing_keys)))
         self.to(device)
         self.eval()
 
