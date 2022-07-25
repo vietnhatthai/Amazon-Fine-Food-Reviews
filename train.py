@@ -176,13 +176,10 @@ criterion = torch.nn.MSELoss()
 
 tracker = Tracker(MODELNAME, SAVE_PATH)
 
-import numpy as np
-
 for epoch in range(tracker.get_epoch(), EPOCHS+1):
-    # train(epoch, model, trainloader, optimizer, criterion)
-    # test_loss, test_acc = eval(epoch, model, testloader, criterion)
-    test_loss = np.random.rand()
-    test_acc = np.random.rand()
+    train(epoch, model, trainloader, optimizer, criterion)
+    test_loss, test_acc = eval(epoch, model, testloader, criterion)
+
     print(f'Epoch {epoch}: Test loss: {test_loss} Test acc: {test_acc}')
 
     tracker.update(epoch, test_loss, test_acc, model)
@@ -192,6 +189,40 @@ for epoch in range(tracker.get_epoch(), EPOCHS+1):
 
 tracker.close()       
 
-# eval after training
-# model.from_pretrained(os.path.join(SAVE_PATH, MODELNAME))
-# test_loss, test_acc = eval(EPOCHS, model, testloader, criterion)
+model = ReviewsModel()
+
+if os.path.exists(os.path.join(SAVE_PATH, MODELNAME, 'best')):
+    model.from_pretrained(os.path.join(SAVE_PATH, MODELNAME, 'best'))
+else:
+    model.from_pretrained(os.path.join(SAVE_PATH, MODELNAME))
+
+model.to(device)
+total = sum(p.numel() for p in model.parameters())
+print(f'total parameters: {total:,}')
+
+def eval(dataloader):
+    model.eval()
+    preds = []
+    with torch.no_grad():
+        for batch in tqdm(dataloader, desc='Evaluating'):
+            batch = tuple(t.to(device) for t in batch)
+            input_ids, attention_mask, labels, ratings = batch
+            outputs = model(input_ids, attention_mask)
+            preds.extend(outputs.detach().cpu().numpy())
+    return preds
+
+trainloader = DataLoader(trainset, batch_size=512, shuffle=False)
+train_preds = eval(trainloader)
+
+# save train predictions
+with open('train_preds.txt', 'w') as f:
+    for pred in train_preds:
+        f.write(str(pred) + '\n')
+
+testloader = DataLoader(testset, batch_size=512, shuffle=False)
+test_preds = eval(testloader)
+
+# save test predictions
+with open('test_preds.txt', 'w') as f:
+    for pred in test_preds:
+        f.write(str(pred) + '\n')
