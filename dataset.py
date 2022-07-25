@@ -2,6 +2,7 @@ import os
 import pandas as pd
 
 import torch
+import torch.nn.functional as F
 from torch.utils.data import Dataset
 
 
@@ -13,6 +14,7 @@ class ReviewDataset(Dataset):
         self.max_len = max_len
         self.split = 'train' if do_train else 'test'
         self.data = self._read_csv()
+        self.max_raring = 5
 
     def __getitem__(self, idx):
         text = self.data.iloc[idx]['Text']
@@ -20,10 +22,13 @@ class ReviewDataset(Dataset):
         rating = self.data.iloc[idx]['Rating']
 
         token = self._get_token(text)
-        score = torch.FloatTensor([score])
-        rating = torch.FloatTensor([rating])
+        # score = torch.FloatTensor([score])
+        rating = torch.tensor(rating, dtype=torch.int) - 1 # 0-indexed
 
-        return token['input_ids'][0], token['attention_mask'][0], score, rating
+        one_hot = torch.zeros(self.max_raring, dtype=torch.float)
+        one_hot[rating] = 1
+
+        return token['input_ids'][0], token['attention_mask'][0], rating, one_hot
 
     def __len__(self):
         return len(self.data)
