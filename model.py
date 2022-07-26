@@ -47,6 +47,9 @@ class ReviewsModel(nn.Module):
         x = self.softmax(x)
         return x
 
+    def get_device(self):
+        return self.base_model.device if self.base_model is not None else 'cpu'
+
     def save_pretrained(self, path):
         os.makedirs(path, exist_ok=True)
         model_path = os.path.join(path, 'pytorch_model.dat')
