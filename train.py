@@ -27,7 +27,7 @@ base_model = AutoModel.from_pretrained(MODELNAME_OR_PATH, config=config)
 trainset = ReviewDataset(tokenizer, DATA_PATH, MAX_LENGTH, do_train=True)
 testset = ReviewDataset(tokenizer, DATA_PATH, MAX_LENGTH, do_train=False)
 
-model = ReviewsModel(base_model)
+model = ReviewsModel(base_model, tokenizer)
 model.to(device)
 
 total = sum(p.numel() for p in model.parameters())

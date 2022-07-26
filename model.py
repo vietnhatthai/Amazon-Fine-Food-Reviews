@@ -5,10 +5,11 @@ import torch.nn as nn
 from transformers import AutoModel, AutoConfig
 
 class ReviewsModel(nn.Module):
-    def __init__(self, base_model=None, num_classes=5):
+    def __init__(self, base_model=None, tokenizer=None, num_classes=5):
         super().__init__()
         self.base_model = base_model
         self.num_classes = num_classes
+        self.tokenizer = tokenizer
 
         self.h_RNN_layers = 3       # RNN hidden layers
         self.h_RNN = 512            # RNN hidden nodes
@@ -54,6 +55,8 @@ class ReviewsModel(nn.Module):
         config_path = os.path.join(path, 'config.json')
         with open(config_path, 'w') as f:
             f.write(config.to_json_string())
+        if self.tokenizer is not None:
+            self.tokenizer.save_pretrained(path)
     
     def from_pretrained(self, path):
         model_path = os.path.join(path, 'pytorch_model.dat')
