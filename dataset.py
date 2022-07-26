@@ -7,14 +7,17 @@ from torch.utils.data import Dataset
 
 
 class ReviewDataset(Dataset):
-    def __init__(self, tokenizer, data_root, max_len, do_train=True):
+    def __init__(self, tokenizer, data_root, max_len, do_train=True, lang='en'):
         super().__init__()
         self.tokenizer = tokenizer
         self.data_root = data_root
         self.max_len = max_len
         self.split = 'train' if do_train else 'test'
-        self.data = self._read_csv()
         self.max_raring = 5
+        self.lang = lang
+        if self.lang != 'en':
+            self.split += '-' + self.lang
+        self.data = self._read_csv()
 
     def __getitem__(self, idx):
         text = self.data.iloc[idx]['Text']

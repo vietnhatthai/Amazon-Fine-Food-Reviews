@@ -3,13 +3,14 @@ import torch
 from tqdm import tqdm
 
 class Tracker:
-    def __init__(self, model_name, save_path, model=None):
+    def __init__(self, model_name, save_path, model=None, tokenizer=None):
         self.model_name = model_name
         self.save_path = save_path
         self.best_loss = float('inf')
         self.best_acc = 0.0
         self.best_epoch = 0
         self.best_model = None
+        self.tokenizer = tokenizer
 
         self.last_epoch = 0
         self.last_best_epoch = 0
@@ -27,6 +28,8 @@ class Tracker:
             print("last best epoch:", self.last_best_epoch)
         if self.last_epoch and model is not None:
             self._load_last_model(model)
+        if self.last_epoch and self.tokenizer is not None:
+            self._load_tokenizer()
 
     def update(self, epoch, loss, acc, model):
         if loss < self.best_loss:
@@ -70,6 +73,11 @@ class Tracker:
                     self.best_loss = float(line[1])
                     self.best_acc = float(line[2])
                     return
+    def _save_tokenizer(self):
+        self.tokenizer.save_pretrained(os.path.join(self.save_path, self.model_name))
+    
+    def _load_tokenizer(self):
+        self.tokenizer.from_pretrained(os.path.join(self.save_path, self.model_name))
 
     def get_epoch(self):
         return self.last_epoch + 1
