@@ -95,17 +95,16 @@ def train(epoch, model, trainloader, optimizer, criterion, verbose=1):
         preds = torch.argmax(outputs, dim=1)
         acc = (preds == labels).sum().item() / len(labels)
         train_acc.append(acc)
-        if verbose==1:
-            bar.set_description('Train Epoch: {} [{}/{} ({:.0f}%)] Loss: {:.4f} Acc: {:.2f} %'.format(
-                epoch, batch_idx, len(trainloader),
-                100. * batch_idx / len(trainloader), 
-                torch.mean(torch.tensor(train_loss[-10:]).float()), torch.mean(torch.tensor(train_acc[-10:]).float())*100))
-        elif verbose==2:
-            if batch_idx % show_iteration == 0:
-                s = 'Train Epoch: {} [{}/{} ({:.0f}%)] Loss: {:.4f} Acc: {:.2f} %'.format(
-                    epoch, batch_idx, len(trainloader),
+
+        s = 'Train Epoch: {} [{}/{} ({:.0f}%)] Loss: {:.4f} Acc: {:.2f} %'
+        s = s.format(epoch, batch_idx, len(trainloader),
                     100. * batch_idx / len(trainloader), 
                     torch.mean(torch.tensor(train_loss[-10:]).float()), torch.mean(torch.tensor(train_acc[-10:]).float())*100)
+
+        if verbose==1:
+            bar.set_description(s)
+        elif verbose==2:
+            if batch_idx % show_iteration == 0:
                 print(s)
 
 def eval(epoch, model, testloader, criterion, verbose=1):
@@ -124,17 +123,16 @@ def eval(epoch, model, testloader, criterion, verbose=1):
         preds = torch.argmax(outputs, dim=1)
         acc = (preds == labels).sum().item() / len(labels)
         test_acc.append(acc)
-        if verbose==1:
-            bar.set_description('Test Epoch: {} [{}/{} ({:.0f}%)] Loss: {:.4f} Acc: {:.2f} %'.format(
-                epoch, batch_idx, len(testloader),
+
+        s = 'Test Epoch: {} [{}/{} ({:.0f}%)] Loss: {:.4f} Acc: {:.2f} %'
+        s = s.format(epoch, batch_idx, len(testloader),
                 100. * batch_idx / len(testloader), 
-                torch.mean(torch.tensor(test_loss).float()), torch.mean(torch.tensor(test_acc).float())*100))
+                torch.mean(torch.tensor(test_loss).float()), torch.mean(torch.tensor(test_acc).float())*100)
+
+        if verbose==1:
+            bar.set_description(s)
         elif verbose==2:
             if batch_idx % show_iteration == 0:
-                s = 'Test Epoch: {} [{}/{} ({:.0f}%)] Loss: {:.4f} Acc: {:.2f} %'.format(
-                    epoch, batch_idx, len(testloader),
-                    100. * batch_idx / len(testloader), 
-                    torch.mean(torch.tensor(test_loss).float()), torch.mean(torch.tensor(test_acc).float())*100)
                 print(s)
 
     return torch.mean(torch.tensor(test_loss)), torch.mean(torch.tensor(test_acc))
